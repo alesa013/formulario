@@ -1,48 +1,35 @@
-function limpa_formulario_cep() {
-    document.getElementById('rua').value = ("");
-    document.getElementById('complemento').value = ("");
-    document.getElementById('bairro').value = ("");
-    document.getElementById('cidade').value = ("");
-    document.getElementById('uf').value = ("");
+function consultaCep() {
+    let cep = document.getElementById("cep").value;
+
+//Verificar se o CEP for diferente, não é CEP válido.
+    if (cep.length !==8) {
+        alert("CEP inválido!");
+        return; //sai da função e não continua.
+    }
+    let url = `https://viacep.com.br/ws/${cep}/json/`;
+
+  //Passa uma função e espera o parâmetro "response".
+    fetch(url).then(function(response){
+        //converte para objeto, e espera a função que vai receber os dados.
+        response.json().then(function(data) {
+            if (data.erro) {
+                alert("CEP não encontrado!");
+            }
+            mostrarDados(data);
+        });
+    }).catch(function(erro){
+        console.log("Erro na requisição", error);
+    });
 }
 
-function meu_callback(conteudo) {
-    if (!("erro" in conteudo)) {
-        document.getElementById('rua').value(conteudo.logradouro);
-        document.getElementById('bairro').value(conteudo.bairro);
-        document.getElementById('cidade').value(conteudo.localidade);
-        document.getElementById('uf').value(conteudo.uf);
-    } else {
-        limpa_formulario_cep()
-        alert('CEP não  encontrado.');
-    }
+function mostrarDados(dados){
+    document.getElementById("logradouro").value = dados.logradouro;
+    document.getElementById("complemento").value = dados.complemento;
+    document.getElementById("bairro").value = dados.bairro;
+    document.getElementById("cidade").value = dados.localidade;
+    document.getElementById("uf").value = dados.uf;
 }
-function pesquisacep(valor) {
-    //Nova variável "cep" somente com dígitos.
-    var cep = valor.replace(/\D/g, '');
 
-    //Expressão regular para validar o CEP.
-    if (cep != "") {
-        var validacep = /^[0-9]{8}$/;
 
-        //Verifica se o campo CEP não está vázio
-        if (validacep.test(cep)) {
-            //Preenche os campos com "..." enquanto a consulta é realizada
-            document.getElementById('rua').value = "...";
-            document.getElementById('bairro').value = "...";
-            document.getElementById('cidade').value = "...";
-            document.getElementById('uf').value = "...";
 
-            //cria um elemento javascript
-            var script = document.createElement('script')
 
-            //Sicroniza com o callback
-            script.src = 'https://viacep.com.br/ws/' + cep + '/json/?callback=meu_callback';
-
-            //Insere script no documento e carrega o conteúdo.
-            document.body.appendChild(script);
-        } else {
-            //cep é invalido.
-            limpa_formulario_cep();
-        }
-    }
